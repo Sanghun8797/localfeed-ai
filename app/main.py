@@ -2,6 +2,8 @@ from fastapi import FastAPI
 import pandas as pd
 import os
 import sys
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 
 # -----------------------------
@@ -36,7 +38,11 @@ app = FastAPI(
     title="LocalFeed AI Recommendation API",
     description="사용자 행동 로그와 게시글 정보를 활용한 동네 기반 개인화 피드 추천 API",
     version="1.0.0"
+    
 )
+
+STATIC_DIR = os.path.join(BASE_DIR, "app", "static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 # -----------------------------
@@ -44,15 +50,7 @@ app = FastAPI(
 # -----------------------------
 @app.get("/")
 def read_root():
-    return {
-        "message": "LocalFeed AI 추천 API 서버가 실행 중입니다.",
-        "available_endpoints": [
-            "/posts",
-            "/users",
-            "/recommend/hybrid/{user_id}",
-            "/user-preferences/{user_id}"
-        ]
-    }
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
 
 # -----------------------------

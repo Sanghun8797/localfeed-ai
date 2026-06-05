@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>LocalFeed AI 추천 서비스</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LocalFeed AI</h1>
+            <p>사용자 행동 로그와 동네 정보를 활용한 개인화 피드 추천 서비스</p>
+        </header>
+
+        <section class="control-box">
+            <label for="userSelect">사용자 선택</label>
+            <select id="userSelect"></select>
+
+            <label for="topN">추천 개수</label>
+            <select id="topN">
+                <option value="5">5개</option>
+                <option value="10" selected>10개</option>
+                <option value="15">15개</option>
+            </select>
+
+            <button onclick="loadRecommendations()">추천 받기</button>
+        </section>
+
+        <section id="userPreference" class="user-preference"></section>
+
+        <section>
+            <h2>추천 게시글</h2>
+            <div id="recommendationList" class="card-list"></div>
+        </section>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
