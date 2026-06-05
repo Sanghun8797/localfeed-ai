@@ -79,7 +79,10 @@ def get_users():
         .tolist()
     )
 
-    user_ids = sorted(user_ids)
+    user_ids = sorted(
+        user_ids,
+        key=lambda user_id: int(user_id.split("_")[1])
+    )
 
     return {
         "user_count": len(user_ids),
