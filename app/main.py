@@ -15,7 +15,7 @@ SRC_DIR = os.path.join(BASE_DIR, "src")
 
 sys.path.append(SRC_DIR)
 
-from hybrid_recommender import recommend_hybrid_for_user
+from hybrid_recommender import recommend_hybrid_for_user, recommend_hybrid_by_input
 
 
 POSTS_PATH = os.path.join(DATA_DIR, "posts.csv")
@@ -126,5 +126,46 @@ def get_hybrid_recommendations(user_id: str, top_n: int = 10):
     return {
         "user_id": user_id,
         "top_n": top_n,
+        "recommendations": result.to_dict(orient="records")
+    }
+
+
+# -----------------------------
+# 9. 외부 입력 기반 추천 API
+# -----------------------------
+@app.get("/recommend/custom")
+def get_custom_recommendations(
+    category1: str,
+    category2: str,
+    dong: str,
+    min_price: int,
+    max_price: int,
+    top_n: int = 10
+):
+    result = recommend_hybrid_by_input(
+        preferred_category_1=category1,
+        preferred_category_2=category2,
+        preferred_dong=dong,
+        min_price=min_price,
+        max_price=max_price,
+        top_n=top_n,
+        apply_diversity=True
+    )
+
+    if result.empty:
+        return {
+            "message": "추천 결과가 없습니다.",
+            "recommendations": []
+        }
+
+    return {
+        "input": {
+            "category1": category1,
+            "category2": category2,
+            "dong": dong,
+            "min_price": min_price,
+            "max_price": max_price,
+            "top_n": top_n
+        },
         "recommendations": result.to_dict(orient="records")
     }

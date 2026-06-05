@@ -14,36 +14,71 @@ async function loadUsers() {
 
     if (data.users.length > 0) {
         userSelect.value = data.users[0];
-        loadRecommendations();
+        await loadSelectedUserPreference();
+        await loadRecommendations();
     }
 }
 
-async function loadUserPreference(userId) {
+
+async function loadSelectedUserPreference() {
+    const userId = document.getElementById("userSelect").value;
+
     const response = await fetch(`/user-preferences/${userId}`);
     const data = await response.json();
 
-    const preferenceBox = document.getElementById("userPreference");
-
     if (data.error) {
-        preferenceBox.innerHTML = `<p>${data.error}</p>`;
+        alert(data.error);
         return;
     }
 
+    document.getElementById("category1").value = data.preferred_category_1;
+    document.getElementById("category2").value = data.preferred_category_2;
+    document.getElementById("dong").value = data.preferred_dong;
+    document.getElementById("minPrice").value = data.min_price;
+    document.getElementById("maxPrice").value = data.max_price;
+
+    updatePreferenceBox();
+}
+
+
+function updatePreferenceBox() {
+    const userId = document.getElementById("userSelect").value;
+    const category1 = document.getElementById("category1").value;
+    const category2 = document.getElementById("category2").value;
+    const dong = document.getElementById("dong").value;
+    const minPrice = document.getElementById("minPrice").value;
+    const maxPrice = document.getElementById("maxPrice").value;
+
+    const preferenceBox = document.getElementById("userPreference");
+
     preferenceBox.innerHTML = `
-        <h3>${userId} 선호 정보</h3>
-        <p>선호 카테고리: ${data.preferred_category_1}, ${data.preferred_category_2}</p>
-        <p>선호 동네: ${data.preferred_dong}</p>
-        <p>선호 가격대: ${Number(data.min_price).toLocaleString()}원 ~ ${Number(data.max_price).toLocaleString()}원</p>
+        <h3>${userId} 기반 추천 조건</h3>
+        <p>선호 카테고리: ${category1}, ${category2}</p>
+        <p>선호 동네: ${dong}</p>
+        <p>선호 가격대: ${Number(minPrice).toLocaleString()}원 ~ ${Number(maxPrice).toLocaleString()}원</p>
+        <p class="meta">샘플 사용자의 기본 선호 정보를 불러온 뒤, 현재 입력된 조건을 기준으로 추천합니다.</p>
     `;
 }
 
+
 async function loadRecommendations() {
-    const userId = document.getElementById("userSelect").value;
+    const category1 = document.getElementById("category1").value;
+    const category2 = document.getElementById("category2").value;
+    const dong = document.getElementById("dong").value;
+    const minPrice = document.getElementById("minPrice").value;
+    const maxPrice = document.getElementById("maxPrice").value;
     const topN = document.getElementById("topN").value;
 
-    await loadUserPreference(userId);
+    if (Number(minPrice) > Number(maxPrice)) {
+        alert("최소 가격은 최대 가격보다 클 수 없습니다.");
+        return;
+    }
 
-    const response = await fetch(`/recommend/hybrid/${userId}?top_n=${topN}`);
+    updatePreferenceBox();
+
+    const url = `/recommend/custom?category1=${encodeURIComponent(category1)}&category2=${encodeURIComponent(category2)}&dong=${encodeURIComponent(dong)}&min_price=${minPrice}&max_price=${maxPrice}&top_n=${topN}`;
+
+    const response = await fetch(url);
     const data = await response.json();
 
     const list = document.getElementById("recommendationList");
@@ -69,5 +104,6 @@ async function loadRecommendations() {
         list.appendChild(card);
     });
 }
+
 
 window.onload = loadUsers;

@@ -283,8 +283,107 @@ def recommend_hybrid_for_user(user_id, top_n=10, apply_diversity=True):
     return recommended[selected_columns]
 
 
+
+
+
+
 # -----------------------------
-# 13. 실행 테스트
+# 13. 외부 입력 기반 하이브리드 추천 함수
+# -----------------------------
+def recommend_hybrid_by_input(
+    preferred_category_1,
+    preferred_category_2,
+    preferred_dong,
+    min_price,
+    max_price,
+    top_n=10,
+    apply_diversity=True
+):
+    candidate_posts = posts_df.copy()
+
+    # 입력값 숫자 변환
+    min_price = int(min_price)
+    max_price = int(max_price)
+
+    # 사용자 입력 기반 카테고리 점수
+    candidate_posts["profile_category_score"] = candidate_posts["category"].apply(
+        lambda category: 1.0
+        if category == preferred_category_1
+        else 0.8
+        if category == preferred_category_2
+        else 0.0
+    )
+
+    # 사용자 입력 기반 동네 점수
+    candidate_posts["profile_dong_score"] = candidate_posts["dong"].apply(
+        lambda dong: 1.0 if dong == preferred_dong else 0.0
+    )
+
+    # 사용자 입력 기반 가격대 적합도
+    candidate_posts["price_match_score"] = candidate_posts["price"].apply(
+        lambda price: calculate_price_match_score(
+            price,
+            min_price,
+            max_price
+        )
+    )
+
+    # 인기도 점수
+    candidate_posts["popularity_score_raw"] = (
+        candidate_posts["view_count"] * 0.3
+        + candidate_posts["like_count"] * 2.0
+        + candidate_posts["chat_count"] * 3.0
+    )
+
+    # 최신성 점수
+    candidate_posts = add_recency_score(candidate_posts)
+
+    # 점수 정규화
+    candidate_posts["popularity_score"] = min_max_scale(candidate_posts["popularity_score_raw"])
+    candidate_posts["recency_score_scaled"] = min_max_scale(candidate_posts["recency_score"])
+
+    # 외부 입력 기반 최종 하이브리드 점수
+    candidate_posts["hybrid_score"] = (
+        candidate_posts["profile_category_score"] * 0.35
+        + candidate_posts["profile_dong_score"] * 0.20
+        + candidate_posts["price_match_score"] * 0.20
+        + candidate_posts["popularity_score"] * 0.15
+        + candidate_posts["recency_score_scaled"] * 0.10
+    )
+
+    ranked_posts = candidate_posts.sort_values(
+        by="hybrid_score",
+        ascending=False
+    )
+
+    if apply_diversity:
+        recommended = diversity_rerank(
+            ranked_posts,
+            top_n=top_n,
+            max_same_category=3
+        )
+    else:
+        recommended = ranked_posts.head(top_n)
+
+    selected_columns = [
+        "post_id",
+        "title",
+        "category",
+        "price",
+        "dong",
+        "profile_category_score",
+        "profile_dong_score",
+        "price_match_score",
+        "popularity_score",
+        "recency_score_scaled",
+        "hybrid_score"
+    ]
+
+    return recommended[selected_columns]
+
+
+# -----------------------------
+# 14. 실행 테스트
 # -----------------------------
 if __name__ == "__main__":
     target_user_id = "user_1"
@@ -313,3 +412,19 @@ if __name__ == "__main__":
 
     print("\n개선된 하이브리드 추천 결과 CSV 저장 완료")
     print("저장 위치:", os.path.join(DATA_DIR, "hybrid_recommend_result.csv"))
+    
+    
+    
+    print("\n외부 입력 기반 추천 테스트")
+
+    custom_result = recommend_hybrid_by_input(
+    preferred_category_1="디지털기기",
+    preferred_category_2="게임/취미",
+    preferred_dong="신림동",
+    min_price=50000,
+    max_price=200000,
+    top_n=10,
+    apply_diversity=True
+    )
+
+    print(custom_result.to_string(index=False))
