@@ -23,6 +23,7 @@ header p {
     color: #666;
 }
 
+/* 개인화 추천 설정 박스 */
 .custom-box {
     background-color: white;
     padding: 22px;
@@ -41,40 +42,52 @@ header p {
     margin-bottom: 18px;
 }
 
+/* 추천 조건 입력 폼 */
 .custom-form {
     display: grid;
-    grid-template-columns: 140px 1fr 140px 1fr;
-    gap: 12px;
+    grid-template-columns: 130px 240px 130px 240px;
+    column-gap: 32px;
+    row-gap: 16px;
     align-items: center;
+    justify-content: center;
 }
 
-.custom-form input,
-.custom-form select {
+.custom-form label {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.custom-form select,
+.custom-form input {
+    width: 100%;
+    max-width: 240px;
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #ccc;
     background-color: white;
+    box-sizing: border-box;
+    font-size: 15px;
 }
 
+/* 추천 받기 버튼 */
 .custom-form button {
-    grid-column: span 4;
+    grid-column: 1 / -1;
     margin-top: 8px;
-}
-
-button {
-    padding: 10px 16px;
+    padding: 12px;
     border-radius: 8px;
     background-color: #ff6f0f;
     color: white;
     border: none;
     cursor: pointer;
     font-weight: bold;
+    font-size: 15px;
 }
 
-button:hover {
+.custom-form button:hover {
     background-color: #e85f00;
 }
 
+/* 추천 조건 요약 박스 */
 .user-preference {
     background-color: #fff7f0;
     padding: 16px;
@@ -83,12 +96,18 @@ button:hover {
     border: 1px solid #ffd8b8;
 }
 
+.user-preference h3 {
+    margin-top: 0;
+}
+
+/* 추천 게시글 카드 목록 */
 .card-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 18px;
 }
 
+/* 추천 게시글 카드 */
 .card {
     background-color: white;
     padding: 20px;
@@ -112,7 +131,33 @@ button:hover {
 }
 
 .score {
-    margin-top: 12px;
+    margin-top: 8px;
     font-size: 13px;
     color: #555;
+}
+
+/* 작은 화면 대응 */
+@media (max-width: 900px) {
+    .container {
+        width: calc(100% - 32px);
+        margin: 24px auto;
+    }
+
+    .custom-form {
+        grid-template-columns: 1fr;
+        row-gap: 10px;
+    }
+
+    .custom-form select,
+    .custom-form input {
+        max-width: 100%;
+    }
+
+    .custom-form button {
+        grid-column: 1;
+    }
+
+    .card-list {
+        grid-template-columns: 1fr;
+    }
 }

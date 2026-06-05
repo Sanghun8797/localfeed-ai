@@ -280,7 +280,9 @@ def recommend_hybrid_for_user(user_id, top_n=10, apply_diversity=True):
         "hybrid_score"
     ]
 
-    return recommended[selected_columns]
+    recommended = recommended.drop_duplicates(subset=["post_id"])
+
+    return recommended[selected_columns].head(top_n)
 
 
 

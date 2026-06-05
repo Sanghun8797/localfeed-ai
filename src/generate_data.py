@@ -1,130 +1,395 @@
-import pandas as pd
+import os
 import random
 from datetime import datetime, timedelta
-import os
+
+import pandas as pd
 
 
 # -----------------------------
-# 1. 프로젝트 경로 설정
+# 1. 랜덤 시드 고정
+# -----------------------------
+SEED = 42
+random.seed(SEED)
+
+
+# -----------------------------
+# 2. 프로젝트 경로 설정
 # -----------------------------
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
+
 os.makedirs(DATA_DIR, exist_ok=True)
 
+POSTS_PATH = os.path.join(DATA_DIR, "posts.csv")
+INTERACTIONS_PATH = os.path.join(DATA_DIR, "interactions.csv")
+USER_PREF_PATH = os.path.join(DATA_DIR, "user_preferences.csv")
+
 
 # -----------------------------
-# 2. 기본 데이터 설정
+# 3. 카테고리별 현실적인 상품 후보
 # -----------------------------
-categories = [
-    "디지털기기",
-    "생활가전",
-    "가구/인테리어",
-    "의류",
-    "도서",
-    "스포츠/레저",
-    "유아용품",
-    "반려동물용품",
-    "생활용품",
-    "게임/취미"
-]
+PRODUCT_CATALOG = {
+    "디지털기기": [
+        "아이폰 13", "아이폰 14", "아이폰 SE", "갤럭시 S22", "갤럭시 S23",
+        "아이패드 미니", "아이패드 에어", "갤럭시탭", "애플워치", "갤럭시워치",
+        "에어팟 프로", "갤럭시 버즈", "무선 키보드", "무선 마우스", "게이밍 마우스",
+        "기계식 키보드", "게이밍 모니터", "LG 모니터", "맥북 에어", "삼성 노트북",
+        "외장하드", "USB 허브", "블루투스 스피커", "보조배터리", "와이파이 공유기"
+    ],
+    "생활가전": [
+        "전자레인지", "에어프라이어", "전기포트", "캡슐 커피머신", "믹서기",
+        "토스터기", "공기청정기", "가습기", "제습기", "선풍기",
+        "무선청소기", "로봇청소기", "헤어드라이기", "고데기", "전기히터",
+        "전기장판", "미니 냉장고", "전기밥솥", "인덕션", "스팀다리미"
+    ],
+    "가구/인테리어": [
+        "컴퓨터 책상", "사무용 의자", "게이밍 의자", "책장", "서랍장",
+        "침대 프레임", "싱글 매트리스", "3인용 소파", "좌식 테이블", "원목 식탁",
+        "스탠드 조명", "러그", "암막 커튼", "행거", "옷장",
+        "협탁", "화장대", "전신거울", "수납장", "벽 선반"
+    ],
+    "의류": [
+        "롱패딩", "울 코트", "블루종 자켓", "나이키 후드티", "맨투맨",
+        "니트", "체크 셔츠", "청바지", "슬랙스", "운동복 세트",
+        "원피스", "가디건", "바람막이", "반팔 티셔츠", "트레이닝 팬츠",
+        "운동화", "로퍼", "토트백", "백팩", "볼캡"
+    ],
+    "도서": [
+        "파이썬 입문서", "자바 기본서", "베스트셀러 소설", "정보처리기사 교재",
+        "토익 교재", "컴퓨터활용능력 교재", "경제경영 도서", "자기계발서",
+        "소설책 세트", "에세이", "인문교양서", "영어 회화책", "한국사 교재",
+        "코딩 테스트 책", "머신러닝 입문서"
+    ],
+    "스포츠/레저": [
+        "요가매트", "덤벨 세트", "아령", "푸쉬업바", "폼롤러",
+        "실내 자전거", "러닝화", "등산화", "캠핑 의자", "캠핑 테이블",
+        "텐트", "침낭", "낚시대", "자전거 헬멧", "배드민턴 라켓",
+        "테니스 라켓", "축구공", "농구공", "골프채", "헬스 장갑"
+    ],
+    "유아용품": [
+        "유모차", "카시트", "아기 침대", "아기 식탁의자", "분유포트",
+        "젖병 소독기", "아기 장난감", "블록 장난감", "아기 옷 세트",
+        "아기 신발", "기저귀 정리함", "아기 욕조", "놀이매트",
+        "아기 그림책", "아기띠"
+    ],
+    "반려동물용품": [
+        "강아지 하우스", "고양이 캣타워", "고양이 화장실", "자동 급식기",
+        "반려동물 이동장", "강아지 옷", "고양이 장난감", "강아지 장난감",
+        "반려동물 방석", "목줄", "하네스", "사료 보관통", "물그릇",
+        "배변패드", "스크래쳐"
+    ],
+    "생활용품": [
+        "식기 세트", "냄비 세트", "프라이팬", "수납 박스", "빨래 건조대",
+        "청소도구 세트", "욕실 선반", "화장품 정리함", "텀블러",
+        "도시락통", "장우산", "공구 세트", "멀티탭", "디퓨저",
+        "방향제", "담요", "쿠션", "베개", "수건 세트"
+    ],
+    "게임/취미": [
+        "닌텐도 스위치", "플스5 게임 타이틀", "플스4 게임 타이틀", "Xbox 컨트롤러",
+        "게임 패드", "보드게임", "레고 세트", "피규어", "프라모델",
+        "입문용 드론", "카메라 삼각대", "필름 카메라", "통기타", "우쿨렐레",
+        "디지털 피아노", "그림 도구", "캘리그라피 세트", "퍼즐", "만화책 세트"
+    ]
+}
 
-dongs = [
+CATEGORIES = list(PRODUCT_CATALOG.keys())
+
+
+# -----------------------------
+# 4. 동네 후보
+# -----------------------------
+DONGS = [
     ("신림동", 37.4842, 126.9290),
     ("봉천동", 37.4826, 126.9416),
     ("낙성대동", 37.4768, 126.9586),
-    ("서울대입구", 37.4812, 126.9527),
+    ("청룡동", 37.4812, 126.9527),
+    ("대학동", 37.4706, 126.9368),
     ("사당동", 37.4766, 126.9816),
     ("상도동", 37.4996, 126.9310),
     ("흑석동", 37.5088, 126.9636)
 ]
 
-sample_titles = {
-    "디지털기기": [
-        "맥북 에어 M2 판매합니다", "아이폰 15 팝니다", "게이밍 모니터 판매",
-        "에어팟 프로 2세대", "아이패드 미니 판매", "삼성 갤럭시 판매"
-    ],
-    "생활가전": [
-        "전자레인지 판매", "공기청정기 팝니다", "무선청소기 판매",
-        "미니 냉장고", "에어프라이어 판매", "제습기 팝니다"
-    ],
-    "가구/인테리어": [
-        "책상 판매합니다", "의자 팝니다", "원목 선반",
-        "침대 프레임", "소파 판매", "수납장 팝니다"
-    ],
-    "의류": [
-        "겨울 패딩 판매", "나이키 후드티", "청바지 팝니다",
-        "운동화 판매", "맨투맨 판매", "코트 팝니다"
-    ],
-    "도서": [
-        "파이썬 책 판매", "자바 입문서", "토익 교재",
-        "소설책 묶음", "알고리즘 책 판매", "경제경영 도서"
-    ],
-    "스포츠/레저": [
-        "자전거 판매", "헬스 덤벨", "캠핑 의자",
-        "러닝화 팝니다", "요가매트 판매", "등산가방 팝니다"
-    ],
-    "유아용품": [
-        "유모차 판매", "아기 장난감", "아기 옷 묶음",
-        "카시트 팝니다", "아기침대 판매", "분유포트 팝니다"
-    ],
-    "반려동물용품": [
-        "강아지 하우스", "고양이 캣타워", "반려동물 이동장",
-        "강아지 옷", "고양이 장난감", "강아지 배변패드"
-    ],
-    "생활용품": [
-        "수납함 판매", "조명 팝니다", "식기 세트",
-        "청소용품 묶음", "커튼 판매", "러그 팝니다"
-    ],
-    "게임/취미": [
-        "닌텐도 스위치", "플스5 타이틀", "보드게임 판매",
-        "레고 세트", "피규어 판매", "키보드 취미용품"
-    ]
+
+# -----------------------------
+# 5. 제목/설명 템플릿
+# -----------------------------
+TITLE_TEMPLATES = [
+    "{item} 판매합니다",
+    "{item} 저렴하게 내놓습니다",
+    "{item} 상태 좋아요",
+    "{item} 급처합니다",
+    "{item} 거의 새상품입니다",
+    "{item} 사용감 적어요",
+    "{item} 필요하신 분 가져가세요",
+    "{item} 이사 정리합니다"
+]
+
+DESCRIPTION_TEMPLATES = [
+    "{dong}에서 거래 가능한 {item}입니다. 상태 좋고 빠른 거래 원합니다.",
+    "{item} 판매합니다. {dong} 근처 직거래 가능하고 사용감은 적은 편입니다.",
+    "{dong} 인근에서 거래 원합니다. {item} 필요하신 분 연락 주세요.",
+    "집 정리하면서 {item} 내놓습니다. {dong}에서 직거래 가능합니다.",
+    "{item} 상태 양호합니다. {dong} 근처에서 시간 맞춰 거래 가능합니다."
+]
+
+
+def generate_post_title(category):
+    item = random.choice(PRODUCT_CATALOG[category])
+    template = random.choice(TITLE_TEMPLATES)
+
+    return item, template.format(item=item)
+
+
+def generate_description(item, dong):
+    template = random.choice(DESCRIPTION_TEMPLATES)
+
+    return template.format(item=item, dong=dong)
+
+
+# -----------------------------
+# 6. 상품별 가격 범위 설정
+# -----------------------------
+ITEM_PRICE_RANGES = {
+    # 디지털기기
+    "아이폰 13": (250000, 600000),
+    "아이폰 14": (400000, 850000),
+    "아이폰 SE": (120000, 350000),
+    "갤럭시 S22": (250000, 550000),
+    "갤럭시 S23": (450000, 850000),
+    "아이패드 미니": (250000, 600000),
+    "아이패드 에어": (350000, 800000),
+    "갤럭시탭": (150000, 600000),
+    "애플워치": (120000, 500000),
+    "갤럭시워치": (80000, 300000),
+    "에어팟 프로": (90000, 250000),
+    "갤럭시 버즈": (40000, 150000),
+    "무선 키보드": (10000, 70000),
+    "무선 마우스": (5000, 50000),
+    "게이밍 마우스": (15000, 90000),
+    "기계식 키보드": (20000, 150000),
+    "게이밍 모니터": (80000, 350000),
+    "LG 모니터": (50000, 300000),
+    "맥북 에어": (500000, 1200000),
+    "삼성 노트북": (250000, 900000),
+    "외장하드": (20000, 120000),
+    "USB 허브": (5000, 40000),
+    "블루투스 스피커": (10000, 120000),
+    "보조배터리": (5000, 50000),
+    "와이파이 공유기": (10000, 80000),
+
+    # 생활가전
+    "전자레인지": (20000, 120000),
+    "에어프라이어": (20000, 120000),
+    "전기포트": (5000, 40000),
+    "캡슐 커피머신": (30000, 180000),
+    "믹서기": (10000, 80000),
+    "토스터기": (8000, 50000),
+    "공기청정기": (40000, 300000),
+    "가습기": (10000, 100000),
+    "제습기": (70000, 300000),
+    "선풍기": (10000, 80000),
+    "무선청소기": (40000, 300000),
+    "로봇청소기": (80000, 500000),
+    "헤어드라이기": (5000, 80000),
+    "고데기": (5000, 70000),
+    "전기히터": (10000, 100000),
+    "전기장판": (10000, 80000),
+    "미니 냉장고": (50000, 250000),
+    "전기밥솥": (30000, 250000),
+    "인덕션": (30000, 200000),
+    "스팀다리미": (10000, 100000),
+
+    # 가구/인테리어
+    "컴퓨터 책상": (20000, 150000),
+    "사무용 의자": (20000, 180000),
+    "게이밍 의자": (40000, 250000),
+    "책장": (20000, 120000),
+    "서랍장": (15000, 120000),
+    "침대 프레임": (50000, 300000),
+    "싱글 매트리스": (30000, 200000),
+    "3인용 소파": (80000, 500000),
+    "좌식 테이블": (10000, 80000),
+    "원목 식탁": (50000, 400000),
+    "스탠드 조명": (10000, 80000),
+    "러그": (10000, 100000),
+    "암막 커튼": (10000, 80000),
+    "행거": (10000, 70000),
+    "옷장": (50000, 300000),
+    "협탁": (10000, 100000),
+    "화장대": (30000, 250000),
+    "전신거울": (10000, 80000),
+    "수납장": (20000, 150000),
+    "벽 선반": (5000, 50000),
+
+    # 의류
+    "롱패딩": (30000, 250000),
+    "울 코트": (30000, 200000),
+    "블루종 자켓": (20000, 150000),
+    "나이키 후드티": (15000, 80000),
+    "맨투맨": (10000, 60000),
+    "니트": (10000, 70000),
+    "체크 셔츠": (8000, 50000),
+    "청바지": (10000, 70000),
+    "슬랙스": (10000, 60000),
+    "운동복 세트": (15000, 100000),
+    "원피스": (10000, 80000),
+    "가디건": (10000, 70000),
+    "바람막이": (15000, 120000),
+    "반팔 티셔츠": (5000, 40000),
+    "트레이닝 팬츠": (8000, 60000),
+    "운동화": (20000, 150000),
+    "로퍼": (15000, 100000),
+    "토트백": (10000, 150000),
+    "백팩": (10000, 120000),
+    "볼캡": (5000, 50000),
+
+    # 도서
+    "파이썬 입문서": (8000, 30000),
+    "자바 기본서": (8000, 30000),
+    "베스트셀러 소설": (5000, 18000),
+    "정보처리기사 교재": (10000, 35000),
+    "토익 교재": (5000, 25000),
+    "컴퓨터활용능력 교재": (5000, 25000),
+    "경제경영 도서": (5000, 25000),
+    "자기계발서": (5000, 25000),
+    "소설책 세트": (10000, 50000),
+    "에세이": (5000, 20000),
+    "인문교양서": (5000, 25000),
+    "영어 회화책": (5000, 25000),
+    "한국사 교재": (5000, 25000),
+    "코딩 테스트 책": (10000, 35000),
+    "머신러닝 입문서": (10000, 40000),
+
+    # 스포츠/레저
+    "요가매트": (5000, 40000),
+    "덤벨 세트": (10000, 120000),
+    "아령": (5000, 50000),
+    "푸쉬업바": (5000, 30000),
+    "폼롤러": (5000, 30000),
+    "실내 자전거": (50000, 300000),
+    "러닝화": (20000, 150000),
+    "등산화": (20000, 180000),
+    "캠핑 의자": (10000, 80000),
+    "캠핑 테이블": (20000, 150000),
+    "텐트": (50000, 400000),
+    "침낭": (15000, 150000),
+    "낚시대": (20000, 200000),
+    "자전거 헬멧": (10000, 80000),
+    "배드민턴 라켓": (5000, 80000),
+    "테니스 라켓": (10000, 150000),
+    "축구공": (5000, 40000),
+    "농구공": (5000, 40000),
+    "골프채": (50000, 500000),
+    "헬스 장갑": (5000, 30000),
+
+    # 유아용품
+    "유모차": (50000, 500000),
+    "카시트": (30000, 350000),
+    "아기 침대": (30000, 250000),
+    "아기 식탁의자": (20000, 150000),
+    "분유포트": (10000, 80000),
+    "젖병 소독기": (20000, 150000),
+    "아기 장난감": (5000, 50000),
+    "블록 장난감": (5000, 80000),
+    "아기 옷 세트": (5000, 50000),
+    "아기 신발": (5000, 40000),
+    "기저귀 정리함": (5000, 40000),
+    "아기 욕조": (5000, 50000),
+    "놀이매트": (20000, 150000),
+    "아기 그림책": (5000, 30000),
+    "아기띠": (20000, 150000),
+
+    # 반려동물용품
+    "강아지 하우스": (10000, 100000),
+    "고양이 캣타워": (30000, 250000),
+    "고양이 화장실": (10000, 80000),
+    "자동 급식기": (20000, 150000),
+    "반려동물 이동장": (10000, 100000),
+    "강아지 옷": (5000, 40000),
+    "고양이 장난감": (3000, 30000),
+    "강아지 장난감": (3000, 30000),
+    "반려동물 방석": (5000, 80000),
+    "목줄": (3000, 30000),
+    "하네스": (5000, 50000),
+    "사료 보관통": (5000, 50000),
+    "물그릇": (3000, 30000),
+    "배변패드": (5000, 30000),
+    "스크래쳐": (5000, 60000),
+
+    # 생활용품
+    "식기 세트": (5000, 80000),
+    "냄비 세트": (10000, 150000),
+    "프라이팬": (5000, 80000),
+    "수납 박스": (3000, 50000),
+    "빨래 건조대": (5000, 50000),
+    "청소도구 세트": (5000, 50000),
+    "욕실 선반": (5000, 50000),
+    "화장품 정리함": (5000, 50000),
+    "텀블러": (3000, 40000),
+    "도시락통": (3000, 30000),
+    "장우산": (3000, 30000),
+    "공구 세트": (10000, 100000),
+    "멀티탭": (3000, 30000),
+    "디퓨저": (5000, 50000),
+    "방향제": (3000, 30000),
+    "담요": (5000, 50000),
+    "쿠션": (5000, 50000),
+    "베개": (5000, 50000),
+    "수건 세트": (5000, 50000),
+
+    # 게임/취미
+    "닌텐도 스위치": (180000, 350000),
+    "플스5 게임 타이틀": (20000, 80000),
+    "플스4 게임 타이틀": (10000, 50000),
+    "Xbox 컨트롤러": (30000, 100000),
+    "게임 패드": (10000, 70000),
+    "보드게임": (5000, 70000),
+    "레고 세트": (20000, 300000),
+    "피규어": (10000, 200000),
+    "프라모델": (10000, 150000),
+    "입문용 드론": (30000, 250000),
+    "카메라 삼각대": (10000, 100000),
+    "필름 카메라": (30000, 300000),
+    "통기타": (30000, 300000),
+    "우쿨렐레": (20000, 120000),
+    "디지털 피아노": (100000, 700000),
+    "그림 도구": (5000, 80000),
+    "캘리그라피 세트": (5000, 50000),
+    "퍼즐": (3000, 30000),
+    "만화책 세트": (10000, 100000)
 }
 
 
-# -----------------------------
-# 3. 사용자 선호도 생성
-# -----------------------------
-users = [f"user_{i}" for i in range(1, 101)]
+def generate_price(item, category):
+    if item in ITEM_PRICE_RANGES:
+        min_price, max_price = ITEM_PRICE_RANGES[item]
+    else:
+        min_price, max_price = 5000, 100000
 
-user_preferences = []
+    price = random.randint(min_price // 1000, max_price // 1000) * 1000
 
-for user_id in users:
-    preferred_categories = random.sample(categories, 2)
-    preferred_dong = random.choice(dongs)[0]
-
-    min_price = random.randint(1, 15) * 10000
-    max_price = min_price + random.randint(5, 25) * 10000
-
-    user_preferences.append({
-        "user_id": user_id,
-        "preferred_category_1": preferred_categories[0],
-        "preferred_category_2": preferred_categories[1],
-        "preferred_dong": preferred_dong,
-        "min_price": min_price,
-        "max_price": max_price
-    })
-
-user_pref_df = pd.DataFrame(user_preferences)
+    return price
 
 
 # -----------------------------
-# 4. 게시글 데이터 생성
+# 7. 게시글 데이터 생성
 # -----------------------------
 posts = []
 
 for post_id in range(1, 1001):
-    category = random.choice(categories)
-    dong, lat, lon = random.choice(dongs)
+    category = random.choice(CATEGORIES)
+    item, title = generate_post_title(category)
 
-    title = random.choice(sample_titles[category])
-    description = (
-        f"{dong}에서 거래 가능한 {category} 상품입니다. "
-        f"{title} 상품이고 상태 좋습니다. 빠른 거래 원합니다."
+    dong, lat, lon = random.choice(DONGS)
+    description = generate_description(item, dong)
+
+    price = generate_price(item, category)
+
+    created_at = datetime.now() - timedelta(
+        days=random.randint(0, 30),
+        hours=random.randint(0, 23),
+        minutes=random.randint(0, 59)
     )
-
-    price = random.randint(5, 300) * 1000
-    created_at = datetime.now() - timedelta(days=random.randint(0, 30))
 
     view_count = random.randint(10, 1000)
     like_count = random.randint(0, 100)
@@ -149,72 +414,87 @@ posts_df = pd.DataFrame(posts)
 
 
 # -----------------------------
-# 5. 사용자 관심도 계산 함수
+# 8. 사용자 선호 정보 생성
 # -----------------------------
-def calculate_interest_score(user_pref, post):
-    score = 0
+users = [f"user_{i}" for i in range(1, 101)]
 
-    if post["category"] == user_pref["preferred_category_1"]:
-        score += 4
+user_preferences = []
 
-    if post["category"] == user_pref["preferred_category_2"]:
-        score += 3
+for user_id in users:
+    preferred_categories = random.sample(CATEGORIES, 2)
+    preferred_dong, _, _ = random.choice(DONGS)
 
-    if post["dong"] == user_pref["preferred_dong"]:
-        score += 3
+    min_price = random.randint(5, 80) * 1000
+    max_price = min_price + random.randint(100, 500) * 1000
 
-    if user_pref["min_price"] <= post["price"] <= user_pref["max_price"]:
-        score += 2
+    user_preferences.append({
+        "user_id": user_id,
+        "preferred_category_1": preferred_categories[0],
+        "preferred_category_2": preferred_categories[1],
+        "preferred_dong": preferred_dong,
+        "min_price": min_price,
+        "max_price": max_price
+    })
 
-    score += random.uniform(0, 1)
-
-    return score
-
-
-# -----------------------------
-# 6. 관심도에 따른 행동 선택 함수
-# -----------------------------
-def choose_action_by_interest(interest_score):
-    if interest_score >= 8:
-        action_weights = [20, 30, 25, 20, 5]
-    elif interest_score >= 5:
-        action_weights = [40, 30, 18, 8, 4]
-    elif interest_score >= 3:
-        action_weights = [60, 25, 8, 3, 4]
-    else:
-        action_weights = [75, 15, 3, 1, 6]
-
-    action_types = ["view", "click", "like", "chat", "hide"]
-
-    return random.choices(
-        action_types,
-        weights=action_weights,
-        k=1
-    )[0]
+user_pref_df = pd.DataFrame(user_preferences)
 
 
 # -----------------------------
-# 7. 사용자 행동 로그 생성
+# 9. 사용자 행동 로그 생성
 # -----------------------------
+ACTION_WEIGHTS = {
+    "view": 1,
+    "click": 2,
+    "like": 4,
+    "chat": 5,
+    "hide": -3
+}
+
+action_types = list(ACTION_WEIGHTS.keys())
+
 interactions = []
 
 for _ in range(5000):
-    user_pref = user_pref_df.sample(1).iloc[0]
-    user_id = user_pref["user_id"]
+    user_id = random.choice(users)
 
-    sampled_posts = posts_df.sample(20).copy()
+    user_pref = user_pref_df[user_pref_df["user_id"] == user_id].iloc[0]
 
-    sampled_posts["interest_score"] = sampled_posts.apply(
-        lambda post: calculate_interest_score(user_pref, post),
-        axis=1
-    )
+    candidate_posts = posts_df.copy()
+    candidate_posts["sampling_weight"] = 1.0
 
-    selected_post = sampled_posts.sort_values(
-        by="interest_score",
-        ascending=False
+    candidate_posts.loc[
+        candidate_posts["category"] == user_pref["preferred_category_1"],
+        "sampling_weight"
+    ] += 2.0
+
+    candidate_posts.loc[
+        candidate_posts["category"] == user_pref["preferred_category_2"],
+        "sampling_weight"
+    ] += 1.5
+
+    candidate_posts.loc[
+        candidate_posts["dong"] == user_pref["preferred_dong"],
+        "sampling_weight"
+    ] += 1.5
+
+    candidate_posts.loc[
+        (candidate_posts["price"] >= user_pref["min_price"])
+        & (candidate_posts["price"] <= user_pref["max_price"]),
+        "sampling_weight"
+    ] += 1.0
+
+    post = candidate_posts.sample(
+        n=1,
+        weights="sampling_weight"
     ).iloc[0]
 
-    action_type = choose_action_by_interest(selected_post["interest_score"])
+    action_type = random.choices(
+        action_types,
+        weights=[45, 25, 18, 8, 4],
+        k=1
+    )[0]
+
+    interest_score = ACTION_WEIGHTS[action_type]
 
     timestamp = datetime.now() - timedelta(
         days=random.randint(0, 30),
@@ -224,9 +504,9 @@ for _ in range(5000):
 
     interactions.append({
         "user_id": user_id,
-        "post_id": selected_post["post_id"],
+        "post_id": post["post_id"],
         "action_type": action_type,
-        "interest_score": round(selected_post["interest_score"], 3),
+        "interest_score": interest_score,
         "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S")
     })
 
@@ -234,38 +514,25 @@ interactions_df = pd.DataFrame(interactions)
 
 
 # -----------------------------
-# 8. CSV 저장
+# 10. CSV 저장
 # -----------------------------
-posts_df.to_csv(
-    os.path.join(DATA_DIR, "posts.csv"),
-    index=False,
-    encoding="utf-8-sig"
-)
-
-interactions_df.to_csv(
-    os.path.join(DATA_DIR, "interactions.csv"),
-    index=False,
-    encoding="utf-8-sig"
-)
-
-user_pref_df.to_csv(
-    os.path.join(DATA_DIR, "user_preferences.csv"),
-    index=False,
-    encoding="utf-8-sig"
-)
+posts_df.to_csv(POSTS_PATH, index=False, encoding="utf-8-sig")
+interactions_df.to_csv(INTERACTIONS_PATH, index=False, encoding="utf-8-sig")
+user_pref_df.to_csv(USER_PREF_PATH, index=False, encoding="utf-8-sig")
 
 
 # -----------------------------
-# 9. 생성 결과 출력
+# 11. 실행 결과 출력
 # -----------------------------
 print("데이터 생성 완료")
+print("-" * 50)
 print("posts.csv:", posts_df.shape)
 print("interactions.csv:", interactions_df.shape)
 print("user_preferences.csv:", user_pref_df.shape)
-print("저장 폴더:", DATA_DIR)
-
-print("\n행동 로그 분포")
-print(interactions_df["action_type"].value_counts())
-
-print("\n사용자 선호도 예시")
-print(user_pref_df.head().to_string(index=False))
+print("-" * 50)
+print("posts.csv 저장 위치:", POSTS_PATH)
+print("interactions.csv 저장 위치:", INTERACTIONS_PATH)
+print("user_preferences.csv 저장 위치:", USER_PREF_PATH)
+print("-" * 50)
+print("게시글 예시")
+print(posts_df[["post_id", "title", "category", "price", "dong"]].head(10).to_string(index=False))

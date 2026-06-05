@@ -22,8 +22,11 @@
                 <label for="userSelect">샘플 사용자</label>
                 <select id="userSelect" onchange="loadSelectedUserPreference()"></select>
 
-                <div></div>
-                <div></div>
+                <label for="recommendMode">추천 방식</label>
+                <select id="recommendMode">
+                    <option value="custom" selected>조건 기반 추천</option>
+                    <option value="torch">PyTorch AI 추천</option>
+                </select>
 
                 <label for="category1">선호 카테고리 1</label>
                 <select id="category1">
@@ -64,7 +67,8 @@
                     <option value="신림동">신림동</option>
                     <option value="봉천동">봉천동</option>
                     <option value="낙성대동">낙성대동</option>
-                    <option value="서울대입구">서울대입구</option>
+                    <option value="청룡동">청룡동</option>
+                    <option value="대학동">대학동</option>
                     <option value="사당동">사당동</option>
                     <option value="상도동">상도동</option>
                     <option value="흑석동">흑석동</option>

@@ -16,6 +16,7 @@ SRC_DIR = os.path.join(BASE_DIR, "src")
 sys.path.append(SRC_DIR)
 
 from hybrid_recommender import recommend_hybrid_for_user, recommend_hybrid_by_input
+from pytorch_recommender import recommend_torch_for_user
 
 
 POSTS_PATH = os.path.join(DATA_DIR, "posts.csv")
@@ -167,5 +168,32 @@ def get_custom_recommendations(
             "max_price": max_price,
             "top_n": top_n
         },
+        "recommendations": result.to_dict(orient="records")
+    }
+
+
+
+
+# -----------------------------
+# 10. PyTorch 관심 확률 기반 추천 API
+# -----------------------------
+@app.get("/recommend/torch/{user_id}")
+def get_torch_recommendations(user_id: str, top_n: int = 10):
+    result = recommend_torch_for_user(
+        user_id=user_id,
+        top_n=top_n
+    )
+
+    if result.empty:
+        return {
+            "user_id": user_id,
+            "message": "PyTorch 추천 결과가 없습니다.",
+            "recommendations": []
+        }
+
+    return {
+        "user_id": user_id,
+        "top_n": top_n,
+        "model": "PyTorch interest probability model",
         "recommendations": result.to_dict(orient="records")
     }
