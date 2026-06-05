@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>LocalFeed AI 추천 서비스</title>
+    <title>당근 동네피드 추천 시스템</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>LocalFeed AI</h1>
+            <h1>당근 동네피드 추천 시스템</h1>
             <p>샘플 사용자를 선택하면 기본 선호 정보가 자동 입력되며, 직접 수정하여 추천 결과를 확인할 수 있습니다.</p>
         </header>
 
@@ -21,6 +21,9 @@
             <div class="custom-form">
                 <label for="userSelect">샘플 사용자</label>
                 <select id="userSelect" onchange="loadSelectedUserPreference()"></select>
+
+                <div></div>
+                <div></div>
 
                 <label for="category1">선호 카테고리 1</label>
                 <select id="category1">
@@ -50,6 +53,12 @@
                     <option value="게임/취미">게임/취미</option>
                 </select>
 
+                <label for="minPrice">최소 가격</label>
+                <input type="number" id="minPrice" value="50000">
+
+                <label for="maxPrice">최대 가격</label>
+                <input type="number" id="maxPrice" value="200000">
+
                 <label for="dong">선호 동네</label>
                 <select id="dong">
                     <option value="신림동">신림동</option>
@@ -60,12 +69,6 @@
                     <option value="상도동">상도동</option>
                     <option value="흑석동">흑석동</option>
                 </select>
-
-                <label for="minPrice">최소 가격</label>
-                <input type="number" id="minPrice" value="50000">
-
-                <label for="maxPrice">최대 가격</label>
-                <input type="number" id="maxPrice" value="200000">
 
                 <label for="topN">추천 개수</label>
                 <select id="topN">
