@@ -131,6 +131,10 @@ async function loadRecommendations() {
         const card = document.createElement("div");
         card.className = "card";
 
+        card.onclick = () => {
+             window.location.href = `/static/detail.html?post_id=${post.post_id}`;
+        };
+
         let scoreText = "";
 
         if (recommendMode === "torch") {

@@ -197,3 +197,21 @@ def get_torch_recommendations(user_id: str, top_n: int = 10):
         "model": "PyTorch interest probability model",
         "recommendations": result.to_dict(orient="records")
     }
+
+
+
+
+
+# -----------------------------
+# 게시글 상세 조회 API
+# -----------------------------
+@app.get("/posts/{post_id}")
+def get_post_detail(post_id: int):
+    post = posts_df[posts_df["post_id"] == post_id]
+
+    if post.empty:
+        return {
+            "error": f"{post_id}번 게시글을 찾을 수 없습니다."
+        }
+
+    return post.iloc[0].to_dict()
