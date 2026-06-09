@@ -1,51 +1,96 @@
-# LocalFeed AI - 동네 기반 개인화 피드 추천 시스템
+# LocalFeed AI - 지역 기반 중고거래 추천 서비스
 
-## 1. 프로젝트 개요
+지역 기반 중고거래 서비스를 가정하여 사용자가 입력한 선호 조건을 바탕으로 맞춤형 게시글을 추천하는 AI 추천 서비스입니다.
 
-LocalFeed AI는 지역 기반 중고거래 서비스의 홈 피드 추천 문제를 가정하고, 사용자 행동 로그와 게시글 정보를 활용해 개인화 추천 과정을 구현한 포트폴리오 프로젝트입니다.
+사용자는 이름, 선호 카테고리, 선호 동네, 가격대를 입력할 수 있으며, 시스템은 카테고리 적합도, 동네 적합도, 가격대 적합도, 인기도, 최신성을 종합해 추천 게시글을 제공합니다.
 
-이 프로젝트에서는 사용자의 조회, 클릭, 찜, 채팅, 숨김 행동과 게시글의 카테고리, 동네, 가격대, 인기도, 최신성을 함께 반영하여 사용자별로 다른 추천 결과를 제공합니다.
+## 배포 주소
 
-단순 인기글 추천을 기준 모델로 구현한 뒤, 콘텐츠 기반 추천, 사용자 행동 기반 개인화 추천, 하이브리드 추천 모델, 평가 지표 계산, FastAPI API 서버화까지 단계적으로 구현했습니다.
+* Web Demo: https://localfeed-ai.onrender.com/
+* API Docs: https://localfeed-ai.onrender.com/docs
 
-## 2. 문제 정의
+## 프로젝트 개요
 
-지역 기반 서비스에서는 모든 사용자에게 동일한 인기글을 보여주는 방식만으로는 충분하지 않습니다.
+이 프로젝트는 지역 기반 중고거래 서비스의 피드 추천 문제를 가정하여 구현한 개인 포트폴리오 프로젝트입니다.
 
-사용자마다 관심 있는 카테고리, 선호하는 동네, 가격대, 반응한 게시글이 다르기 때문입니다.
+실제 서비스 데이터는 개인정보, 위치정보, 저작권, 서비스 약관 문제가 있을 수 있어 사용하지 않았습니다. 대신 실제 중고거래 서비스의 데이터 구조를 참고하여 가상 게시글 데이터, 사용자 선호 정보, 사용자 행동 로그를 직접 생성했습니다.
 
-따라서 이 프로젝트에서는 다음 문제를 해결하고자 했습니다.
+프로젝트는 데이터 생성, 추천 알고리즘 구현, FastAPI API 서버 개발, 웹 UI 구현, PostgreSQL 연동, Render 배포까지 end-to-end로 구성했습니다.
 
-- 사용자별 관심 카테고리를 반영한 추천
-- 사용자별 선호 동네를 반영한 추천
-- 가격대 선호를 반영한 추천
-- 인기글과 최신성을 함께 고려한 추천
-- 특정 카테고리에 추천이 과도하게 몰리지 않도록 다양성 반영
+## 주요 기능
 
-## 3. 사용 데이터
+* 사용자 이름 입력 기반 맞춤 추천 화면
+* 선호 카테고리 1, 선호 카테고리 2 선택
+* 선호 동네 선택
+* 최소 가격, 최대 가격 입력
+* 추천 개수 선택
+* 조건 기반 하이브리드 추천 결과 제공
+* 추천 점수를 100점 만점으로 환산하여 표시
+* 추천 적합도 라벨 제공
 
-실제 서비스 데이터는 개인정보와 약관 문제로 사용할 수 없기 때문에, 추천 시스템 실험을 위한 가상 데이터를 직접 생성했습니다.
+  * 매우 높음
+  * 높음
+  * 보통
+  * 낮음
+* 추천 게시글 카드형 UI 제공
+* 추천 게시글 클릭 시 상세페이지 이동
+* 상세페이지에서 게시글 설명, 가격, 동네, 조회수, 관심 수, 채팅 수 확인
+* FastAPI 기반 API 문서 자동 제공
+* PostgreSQL 기반 게시글 조회 API 구현
+* Render 배포
 
-생성한 데이터는 다음과 같습니다.
+## 추천 방식
+
+추천 점수는 다음 요소를 종합하여 계산합니다.
+
+* 카테고리 적합도
+* 동네 적합도
+* 가격대 적합도
+* 게시글 인기도
+
+  * 조회수
+  * 관심 수
+  * 채팅 수
+* 최신성
+
+내부 추천 점수는 사용자가 이해하기 쉽도록 100점 만점으로 환산하여 화면에 표시했습니다.
+
+예시:
+
+```text
+추천 적합도: 높음
+추천 점수: 78점 / 100점
+```
+
+## 데이터 구성
+
+프로젝트에서 사용하는 데이터는 CSV 기반으로 생성했습니다.
+
+```text
+data/
+├── posts.csv
+├── interactions.csv
+└── user_preferences.csv
+```
 
 ### posts.csv
 
-중고거래 게시글 데이터입니다.
+게시글 데이터입니다.
 
 주요 컬럼:
 
-- post_id
-- title
-- description
-- category
-- price
-- dong
-- latitude
-- longitude
-- created_at
-- view_count
-- like_count
-- chat_count
+* post_id
+* title
+* description
+* category
+* price
+* dong
+* latitude
+* longitude
+* created_at
+* view_count
+* like_count
+* chat_count
 
 ### interactions.csv
 
@@ -53,158 +98,292 @@ LocalFeed AI는 지역 기반 중고거래 서비스의 홈 피드 추천 문제
 
 주요 컬럼:
 
-- user_id
-- post_id
-- action_type
-- interest_score
-- timestamp
-
-행동 유형:
-
-- view
-- click
-- like
-- chat
-- hide
+* user_id
+* post_id
+* action_type
+* interest_score
+* timestamp
 
 ### user_preferences.csv
 
-사용자별 선호 정보 데이터입니다.
+샘플 사용자 선호 정보 데이터입니다.
 
 주요 컬럼:
 
-- user_id
-- preferred_category_1
-- preferred_category_2
-- preferred_dong
-- min_price
-- max_price
+* user_id
+* preferred_category_1
+* preferred_category_2
+* preferred_dong
+* min_price
+* max_price
 
-## 4. 추천 시스템 구성
+## 데이터 생성 방식
 
-이 프로젝트는 여러 추천 방식을 단계적으로 구현했습니다.
+`src/generate_data.py`에서 가상 게시글, 사용자 선호 정보, 사용자 행동 로그를 생성합니다.
 
-### 4.1 인기글 기반 추천
+카테고리별 상품 후보와 상품별 가격 범위를 정의하여 게시글이 보다 현실적인 형태로 생성되도록 구성했습니다.
 
-파일: `src/baseline_recommender.py`
+예를 들어, 생활가전 전체에 하나의 가격 범위를 적용하는 대신 상품별 가격 범위를 따로 설정했습니다.
 
-조회수, 찜 수, 채팅 수, 최신성을 기반으로 인기 점수를 계산합니다.
-
-```text
-popularity_score =
-view_count * 0.3
-+ like_count * 2.0
-+ chat_count * 3.0
-+ recency_score * 100
+```python
+"헤어드라이기": (5000, 80000)
+"로봇청소기": (80000, 500000)
+"전자레인지": (20000, 120000)
 ```
 
+이를 통해 헤어드라이기처럼 비교적 저가인 상품이 비현실적으로 높은 가격으로 생성되는 문제를 줄였습니다.
 
-### 4.2 콘텐츠 기반 추천
+## PostgreSQL 연동
 
-파일: `src/content_recommender.py`
+CSV로 생성한 게시글, 사용자 행동 로그, 사용자 선호 데이터를 PostgreSQL 테이블로 적재하고, FastAPI에서 SQL 기반 조회 API를 제공했습니다.
 
-게시글의 제목, 설명, 카테고리, 동네 정보를 하나의 텍스트로 결합한 뒤 TF-IDF 벡터화를 적용했습니다.
-
-이후 코사인 유사도를 활용해 특정 게시글과 비슷한 게시글을 추천합니다.
-
-
-
-### 4.3 사용자 행동 기반 개인화 추천
-
-파일: `src/personalized_recommender.py`
-
-사용자 행동 로그에 행동별 가중치를 부여했습니다.
+PostgreSQL 연동은 다음 흐름으로 구현했습니다.
 
 ```text
-view  = 1
-click = 2
-like  = 4
-chat  = 5
-hide  = -3
+CSV 데이터 생성
+→ PostgreSQL 테이블 생성
+→ CSV 데이터 적재
+→ FastAPI에서 SQL 조회
+→ JSON 응답 반환
 ```
 
-사용자별 카테고리 선호도와 동네 선호도를 계산하고, 사용자가 이미 본 게시글은 추천 후보에서 제외했습니다.
+현재 배포된 웹 UI는 CSV 기반 추천 기능을 사용합니다. PostgreSQL API는 로컬 개발 환경에서 DB 연동과 SQL 조회 기능을 검증하기 위해 구현했습니다.
 
-이를 통해 모든 사용자에게 같은 게시글을 보여주는 방식이 아니라, 사용자별 행동 이력에 따라 다른 추천 결과를 제공합니다.
+### PostgreSQL 테이블
 
-### 4.4 하이브리드 추천
+* posts
+* interactions
+* user_preferences
 
-파일: `src/hybrid_recommender.py`
+### PostgreSQL 기반 API
 
-최종 추천 모델입니다.
+* `GET /pg/posts` : PostgreSQL 게시글 목록 조회
+* `GET /pg/posts/{post_id}` : PostgreSQL 게시글 상세 조회
+* `GET /pg/search` : 카테고리, 동네, 가격대 기반 SQL 조건 검색
 
-다음 요소를 결합해 사용자별 추천 점수를 계산했습니다.
-
-- 행동 기반 카테고리 선호도
-- 행동 기반 동네 선호도
-- 사용자 프로필 기반 선호 카테고리
-- 사용자 프로필 기반 선호 동네
-- 가격대 적합도
-- 게시글 인기도
-- 최신성
-- 다양성 re-ranking
+예시:
 
 ```text
-hybrid_score =
-category_score * 0.25
-+ dong_score * 0.15
-+ profile_category_score * 0.20
-+ profile_dong_score * 0.10
-+ price_match_score * 0.10
-+ popularity_score * 0.15
-+ recency_score_scaled * 0.05
+GET /pg/posts?limit=10
 ```
 
+```text
+GET /pg/posts/1
+```
 
+```text
+GET /pg/search?category1=디지털기기&category2=게임/취미&dong=신림동&min_price=0&max_price=200000&limit=10
+```
 
-## 5. 평가 지표
+## PyTorch 추천 모델
 
-파일: `src/evaluate.py`
+사용자 행동 로그와 게시글 메타데이터를 기반으로 PyTorch 관심 확률 예측 모델도 구현했습니다.
 
-추천 모델 평가를 위해 다음 지표를 사용했습니다.
+현재 웹 UI는 외부 사용자가 직접 입력한 선호 조건 기반 추천을 중심으로 구성했으며, PyTorch 추천 API는 모델 실험 및 확장 기능으로 제공합니다.
 
-- Precision@K
-- Recall@K
-- NDCG@K
+### PyTorch 기반 API
 
-`like`, `chat` 행동을 긍정 행동으로 간주하고, 추천 결과가 긍정 행동 게시글을 얼마나 잘 맞히는지 평가했습니다.
+* `GET /recommend/torch/{user_id}`
 
-### 평가 지표 의미
+## 기술 스택
 
-Precision@K는 추천한 K개 게시글 중 실제 긍정 행동 게시글이 얼마나 포함되었는지를 나타냅니다.
+### Backend
 
-Recall@K는 사용자가 실제로 긍정 행동한 게시글 중 추천 결과에 얼마나 포함되었는지를 나타냅니다.
+* Python
+* FastAPI
+* Uvicorn
+* Pandas
 
-NDCG@K는 정답 게시글이 추천 순위 상단에 위치할수록 높은 점수를 주는 지표입니다.
+### Recommendation
 
-## 6. 개선 전후 비교
+* 조건 기반 하이브리드 추천
+* 카테고리, 동네, 가격대, 인기도, 최신성 기반 점수 계산
+* PyTorch 기반 관심 확률 예측 모델
 
-파일: `src/compare_evaluation.py`
+### Database
 
-`evaluation_result_before.csv`와 `evaluation_result_after.csv`를 비교하여 추천 모델 개선 전후의 평균 평가 지표 변화를 확인했습니다.
+* PostgreSQL
+* SQL
+* psycopg2-binary
+* python-dotenv
 
-비교 대상 지표:
+### Frontend
 
-- precision_at_k
-- recall_at_k
-- ndcg_at_k
+* HTML
+* CSS
+* JavaScript
 
-## 7. FastAPI 서버
+### Deployment
 
-파일: `app/main.py`
+* GitHub
+* Render
 
-추천 모델을 API 형태로 제공하기 위해 FastAPI 서버를 구현했습니다.
+## 프로젝트 구조
 
-### 실행 방법
+```text
+localfeed-ai/
+├── app/
+│   ├── main.py
+│   └── static/
+│       ├── index.html
+│       ├── detail.html
+│       ├── script.js
+│       ├── detail.js
+│       ├── style.css
+│       └── logoImage.png
+├── data/
+│   ├── posts.csv
+│   ├── interactions.csv
+│   └── user_preferences.csv
+├── src/
+│   ├── generate_data.py
+│   ├── hybrid_recommender.py
+│   ├── train_torch_model.py
+│   ├── pytorch_recommender.py
+│   └── load_postgres.py
+├── models/
+│   ├── torch_recommender.pt
+│   └── torch_preprocess.pkl
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+## 주요 API
+
+### 메인 화면
+
+```text
+GET /
+```
+
+웹 UI를 반환합니다.
+
+### 게시글 목록 조회
+
+```text
+GET /posts
+```
+
+CSV 기반 게시글 목록을 조회합니다.
+
+### 게시글 상세 조회
+
+```text
+GET /posts/{post_id}
+```
+
+CSV 기반 특정 게시글의 상세 정보를 조회합니다.
+
+### 사용자 목록 조회
+
+```text
+GET /users
+```
+
+샘플 사용자 목록을 조회합니다.
+
+### 사용자 선호 정보 조회
+
+```text
+GET /user-preferences/{user_id}
+```
+
+샘플 사용자의 선호 정보를 조회합니다.
+
+### 조건 기반 추천
+
+```text
+GET /recommend/custom
+```
+
+사용자가 입력한 카테고리, 동네, 가격대를 기준으로 추천 결과를 제공합니다.
+
+예시:
+
+```text
+/recommend/custom?category1=디지털기기&category2=게임/취미&dong=신림동&min_price=0&max_price=200000&top_n=10
+```
+
+### PyTorch 관심 확률 기반 추천
+
+```text
+GET /recommend/torch/{user_id}
+```
+
+사용자 행동 로그 기반으로 학습한 PyTorch 모델을 통해 게시글 관심 확률을 예측합니다.
+
+### PostgreSQL 게시글 목록 조회
+
+```text
+GET /pg/posts
+```
+
+PostgreSQL에 저장된 게시글 목록을 SQL로 조회합니다.
+
+### PostgreSQL 게시글 상세 조회
+
+```text
+GET /pg/posts/{post_id}
+```
+
+PostgreSQL에 저장된 특정 게시글의 상세 정보를 SQL로 조회합니다.
+
+### PostgreSQL 조건 검색
+
+```text
+GET /pg/search
+```
+
+카테고리, 동네, 가격대를 기준으로 SQL 조건 검색을 수행합니다.
+
+## 실행 방법
+
+### 1. 패키지 설치
 
 ```bash
-cd /d D:\SanghunKim\localfeed-ai
+pip install -r requirements.txt
+```
+
+### 2. 데이터 생성
+
+```bash
+python src/generate_data.py
+```
+
+### 3. PyTorch 모델 학습
+
+```bash
+python src/train_torch_model.py
+```
+
+### 4. PostgreSQL 환경 변수 설정
+
+프로젝트 루트에 `.env` 파일을 생성하고 아래 내용을 입력합니다.
+
+```env
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=localfeed_ai
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+```
+
+`.env` 파일에는 DB 비밀번호가 포함되므로 GitHub에 업로드하지 않습니다.
+
+### 5. PostgreSQL 데이터 적재
+
+```bash
+python src/load_postgres.py
+```
+
+### 6. FastAPI 서버 실행
+
+```bash
 uvicorn app.main:app --reload
 ```
 
-
-
-서버 실행 후 접속 주소:
+### 7. 접속
 
 ```text
 http://127.0.0.1:8000
@@ -216,179 +395,23 @@ API 문서:
 http://127.0.0.1:8000/docs
 ```
 
-## 8. API 목록
+## 구현 과정에서 개선한 점
 
-### 서버 상태 확인
+* 샘플 사용자 선택 방식에서 사용자 이름 직접 입력 방식으로 변경
+* 카테고리 중복 선택 방지
+* 선호 카테고리 외 게시글이 추천되는 문제 개선
+* 상품별 가격 범위 설정으로 비현실적인 가격 생성 문제 개선
+* 추천 점수를 100점 만점으로 환산하여 사용자 이해도 개선
+* 추천 카드 클릭 시 상세페이지로 이동하는 서비스 흐름 구현
+* 첫 화면에서는 추천 결과 영역을 숨기고, 추천 실행 후 표시되도록 UI 개선
+* CSV 기반 데이터 구조에 PostgreSQL 연동 추가
+* SQL 기반 게시글 목록 조회, 상세 조회, 조건 검색 API 구현
+* GitHub와 Render를 활용한 배포
 
-```text
-GET /
-```
+## 프로젝트 의의
 
-### 게시글 목록 조회
+이 프로젝트는 단순 게시글 목록 출력이 아니라, 사용자가 입력한 조건을 바탕으로 추천 결과를 계산하고, 카드형 UI와 상세페이지 흐름까지 구현한 개인화 추천 서비스입니다.
 
-```text
-GET /posts
-```
+또한 CSV 기반 데이터 생성에서 끝나지 않고 PostgreSQL 테이블 적재와 SQL 조회 API까지 구현하여, 데이터 저장 계층과 API 계층을 분리하는 경험을 포함했습니다.
 
-예시:
-
-```text
-http://127.0.0.1:8000/posts?limit=5
-```
-
-### 사용자 목록 조회
-
-```text
-GET /users
-```
-
-예시:
-
-```text
-http://127.0.0.1:8000/users
-```
-
-### 사용자 선호 정보 조회
-
-```text
-GET /user-preferences/{user_id}
-```
-
-예시:
-
-```text
-http://127.0.0.1:8000/user-preferences/user_1
-```
-
-### 하이브리드 추천 조회
-
-```text
-GET /recommend/hybrid/{user_id}
-```
-
-예시:
-
-```text
-http://127.0.0.1:8000/recommend/hybrid/user_1?top_n=5
-```
-
-## 9. 프로젝트 구조
-
-```text
-localfeed-ai/
-├── app/
-│   ├── __init__.py
-│   └── main.py
-│
-├── data/
-│   ├── posts.csv
-│   ├── interactions.csv
-│   ├── user_preferences.csv
-│   ├── baseline_recommend_result.csv
-│   ├── hybrid_recommend_result.csv
-│   ├── evaluation_result.csv
-│   └── evaluation_comparison.csv
-│
-├── src/
-│   ├── generate_data.py
-│   ├── generate_data_v1.py
-│   ├── check_data.py
-│   ├── baseline_recommender.py
-│   ├── content_recommender.py
-│   ├── personalized_recommender.py
-│   ├── hybrid_recommender.py
-│   ├── evaluate.py
-│   └── compare_evaluation.py
-│
-└── README.md
-```
-
-## 10. 사용 기술
-
-- Python
-- Pandas
-- scikit-learn
-- FastAPI
-- Uvicorn
-- TF-IDF
-- Cosine Similarity
-- Recommendation System
-- REST API
-
-## 11. 실행 순서
-
-### 1. 데이터 생성
-
-```bash
-python src/generate_data.py
-```
-
-### 2. 데이터 확인
-
-```bash
-python src/check_data.py
-```
-
-### 3. 인기글 추천
-
-```bash
-python src/baseline_recommender.py
-```
-
-### 4. 콘텐츠 기반 추천
-
-```bash
-python src/content_recommender.py
-```
-
-### 5. 개인화 추천
-
-```bash
-python src/personalized_recommender.py
-```
-
-### 6. 하이브리드 추천
-
-```bash
-python src/hybrid_recommender.py
-```
-
-### 7. 평가
-
-```bash
-python src/evaluate.py
-```
-
-### 8. FastAPI 서버 실행
-
-```bash
-uvicorn app.main:app --reload
-```
-
-## 12. 프로젝트에서 배운 점
-
-이 프로젝트를 통해 추천 시스템 개발의 전체 흐름을 경험했습니다.
-
-- 추천 문제 정의
-- 가상 데이터 설계
-- 사용자 행동 로그 생성
-- Baseline 모델 구현
-- 콘텐츠 기반 추천 구현
-- 사용자 행동 기반 개인화 추천 구현
-- 하이브리드 추천 모델 구현
-- 추천 모델 평가
-- FastAPI API 서버화
-
-## 13. 한계점 및 개선 방향
-
-현재 프로젝트는 실제 서비스 데이터가 아닌 가상 데이터를 기반으로 합니다.
-
-향후 개선 방향은 다음과 같습니다.
-
-- 실제 공개 데이터셋 기반 실험
-- Train/Test 시간 분리 기반 평가 방식 적용
-- Sentence-BERT 기반 게시글 임베딩 적용
-- Vector DB 기반 유사 게시글 검색
-- 추천 결과 카드형 웹 UI 구현
-- Docker 기반 실행 환경 구성
-- Render 또는 클라우드 배포
+추천 점수 계산, 데이터 생성, 데이터베이스 연동, API 설계, 웹 UI, 배포까지 end-to-end로 구현했다는 점에서 AI 서비스 개발 포트폴리오로 활용할 수 있습니다.
