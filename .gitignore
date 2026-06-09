@@ -19,3 +19,9 @@ data/evaluation_result.csv
 data/evaluation_result_before.csv
 data/evaluation_result_after.csv
 data/evaluation_comparison.csv
+
+
+.env
+__pycache__/
+*.pyc
+localfeed.db

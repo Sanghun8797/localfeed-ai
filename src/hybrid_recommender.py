@@ -301,7 +301,17 @@ def recommend_hybrid_by_input(
     top_n=10,
     apply_diversity=True
 ):
-    candidate_posts = posts_df.copy()
+    candidate_posts = posts_df[
+        posts_df["category"].isin([preferred_category_1, preferred_category_2])
+    ].copy()
+    
+    if candidate_posts.empty:
+        candidate_posts = posts_df.copy()
+    
+    candidate_posts = candidate_posts[
+        (candidate_posts["price"] >= min_price)
+        & (candidate_posts["price"] <= max_price)
+    ].copy()
 
     # 입력값 숫자 변환
     min_price = int(min_price)

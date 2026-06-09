@@ -8,28 +8,32 @@
 <body>
     <div class="container">
         <header>
-            <h1>당근 동네피드 추천 AI</h1>
-            <p>샘플 사용자를 선택하면 기본 선호 정보가 자동 입력되며, 직접 수정하여 추천 결과를 확인할 수 있습니다.</p>
+            <div class="title-wrap">
+                <img src="/static/logoImage.png" alt="서비스 로고" class="title-logo">
+
+                <div>
+                    <h1>당근 동네피드 추천 AI</h1>
+                    <p>사용자 이름과 선호 조건을 입력하면 개인화된 추천 결과를 확인할 수 있습니다.</p>
+                </div>
+            </div>
         </header>
 
         <section class="custom-box">
-            <h2>개인화 추천 설정</h2>
+            <h2>맞춤 추천 조건 입력</h2>
             <p class="section-desc">
-                샘플 사용자를 선택하거나 선호 카테고리, 동네, 가격대를 직접 수정해 추천을 받을 수 있습니다.
+                이름, 선호 카테고리, 동네, 가격대를 입력해 맞춤 추천을 받을 수 있습니다.
             </p>
 
             <div class="custom-form">
-                <label for="userSelect">샘플 사용자</label>
-                <select id="userSelect" onchange="loadSelectedUserPreference()"></select>
+                <label for="userName">사용자 이름</label>
+                <input type="text" id="userName" value="" placeholder="이름을 입력하세요">
 
-                <label for="recommendMode">추천 방식</label>
-                <select id="recommendMode">
-                    <option value="custom" selected>조건 기반 추천</option>
-                    <option value="torch">PyTorch AI 추천</option>
-                </select>
+                <div></div>
+                <div></div>
 
                 <label for="category1">선호 카테고리 1</label>
                 <select id="category1">
+                    <option value="" selected disabled>선택하세요</option>
                     <option value="디지털기기">디지털기기</option>
                     <option value="생활가전">생활가전</option>
                     <option value="가구/인테리어">가구/인테리어</option>
@@ -44,6 +48,7 @@
 
                 <label for="category2">선호 카테고리 2</label>
                 <select id="category2">
+                    <option value="" selected disabled>선택하세요</option>
                     <option value="디지털기기">디지털기기</option>
                     <option value="생활가전">생활가전</option>
                     <option value="가구/인테리어">가구/인테리어</option>
@@ -57,13 +62,14 @@
                 </select>
 
                 <label for="minPrice">최소 가격</label>
-                <input type="number" id="minPrice" value="50000">
+                <input type="number" id="minPrice" value="0">
 
                 <label for="maxPrice">최대 가격</label>
-                <input type="number" id="maxPrice" value="200000">
+                <input type="number" id="maxPrice" value="0">
 
                 <label for="dong">선호 동네</label>
                 <select id="dong">
+                    <option value="" selected disabled>선택하세요</option>
                     <option value="신림동">신림동</option>
                     <option value="봉천동">봉천동</option>
                     <option value="낙성대동">낙성대동</option>
@@ -76,18 +82,18 @@
 
                 <label for="topN">추천 개수</label>
                 <select id="topN">
-                    <option value="5">5개</option>
                     <option value="10" selected>10개</option>
-                    <option value="15">15개</option>
+                    <option value="20">20개</option>
+                    <option value="30">30개</option>
                 </select>
 
                 <button onclick="loadRecommendations()">추천 받기</button>
             </div>
         </section>
 
-        <section id="userPreference" class="user-preference"></section>
+        <section id="userPreference" class="user-preference" style="display: none;"></section>
 
-        <section>
+        <section id="recommendationSection" style="display: none;">
             <h2>추천 게시글</h2>
             <div id="recommendationList" class="card-list"></div>
         </section>
