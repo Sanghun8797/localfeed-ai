@@ -23,7 +23,6 @@ header p {
     color: #666;
 }
 
-/* 상단 제목 + 로고 */
 .title-wrap {
     display: flex;
     align-items: center;
@@ -40,7 +39,6 @@ header p {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* 개인화 추천 설정 박스 */
 .custom-box {
     background-color: white;
     padding: 22px;
@@ -59,7 +57,6 @@ header p {
     margin-bottom: 18px;
 }
 
-/* 추천 조건 입력 폼 */
 .custom-form {
     display: grid;
     grid-template-columns: 130px 240px 130px 240px;
@@ -86,7 +83,6 @@ header p {
     font-size: 15px;
 }
 
-/* 추천 받기 버튼 */
 .custom-form button {
     grid-column: 1 / -1;
     margin-top: 8px;
@@ -104,7 +100,6 @@ header p {
     background-color: #e85f00;
 }
 
-/* 추천 조건 요약 박스 */
 .user-preference {
     background-color: #fff7f0;
     padding: 16px;
@@ -117,14 +112,12 @@ header p {
     margin-top: 0;
 }
 
-/* 추천 게시글 카드 목록 */
 .card-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 18px;
 }
 
-/* 추천 게시글 카드 */
 .card {
     background-color: white;
     padding: 20px;
@@ -159,7 +152,29 @@ header p {
     color: #555;
 }
 
-/* 게시글 상세 페이지 */
+.empty-state {
+    grid-column: 1 / -1;
+    background-color: white;
+    border: 1px solid #ffd8b8;
+    border-radius: 14px;
+    padding: 28px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.empty-state h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #222;
+    font-size: 20px;
+}
+
+.empty-state p {
+    margin: 8px 0;
+    color: #666;
+    line-height: 1.6;
+}
+
 .detail-box {
     background-color: white;
     padding: 28px;
@@ -190,6 +205,22 @@ header p {
     margin-top: 0;
 }
 
+.post-stats {
+    display: flex;
+    gap: 14px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #444;
+}
+
+.post-stats span {
+    background-color: #fff7f0;
+    border: 1px solid #ffd8b8;
+    border-radius: 20px;
+    padding: 8px 14px;
+}
+
 .back-button {
     width: 100%;
     padding: 14px;
@@ -206,7 +237,6 @@ header p {
     background-color: #e85f00;
 }
 
-/* 작은 화면 대응 */
 @media (max-width: 900px) {
     .container {
         width: calc(100% - 32px);
@@ -242,5 +272,9 @@ header p {
 
     .card-list {
         grid-template-columns: 1fr;
+    }
+
+    .post-stats {
+        flex-wrap: wrap;
     }
 }

@@ -93,7 +93,17 @@ async function loadRecommendations() {
     list.innerHTML = "";
 
     if (!data.recommendations || data.recommendations.length === 0) {
-        list.innerHTML = "<p>추천 결과가 없습니다.</p>";
+        list.innerHTML = `
+            <div class="empty-state">
+                <h3>조건에 맞는 추천 게시글이 없습니다.</h3>
+                <p>
+                    선택한 카테고리, 동네, 가격대에 해당하는 게시글을 찾지 못했습니다.
+                </p>
+                <p>
+                    최대 가격을 높이거나 다른 카테고리·동네를 선택해 다시 추천을 받아보세요.
+                </p>
+            </div>
+        `;
         return;
     }
 
